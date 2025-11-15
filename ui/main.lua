@@ -20,6 +20,57 @@ local tabs = {}
 local currentTabInstance = nil
 local tabIndex = 0
 
+local HttpService = game:GetService("HttpService")
+local icondb = "https://raw.githubusercontent.com/pluem4898/Salmahub/master/ui/icon/icon.lua"
+
+local function LoadIconData()
+    local success, response = pcall(function()
+        return HttpService:GetAsync(icondb)
+    end)
+    
+    if success and response then
+        local func = loadstring(response)
+        if func then
+            return func()
+        end
+    end
+    warn("no data")
+    return nil
+end
+
+-- MacLib:SetIcon(nameassets, "XXXX")
+
+local IconData = LoadIconData() or {}
+
+function MacLib:GetIcon(IconName)
+    local iconInfo = IconData.Icons[IconName]
+    
+    if not iconInfo then
+        warn("MacLib: Icon '" .. IconName .. "' not found in loaded data.")
+        return {
+            Image = "rbxassetid://123",
+            ImageRectOffset = Vector2.new(0, 0),
+            ImageRectSize = Vector2.new(1, 1)
+        }
+    end
+    
+    local spritesheetId = IconData.Spritesheets[tostring(iconInfo.Image)]
+    
+    return {
+        Image = spritesheetId,
+        ImageRectOffset = iconInfo.ImageRectPosition,
+        ImageRectSize = iconInfo.ImageRectSize
+    }
+end
+
+function MacLib:SetIcon(ImageObject, IconName)
+    local icon = MacLib:GetIcon(IconName)
+    
+    ImageObject.Image = icon.Image
+    ImageObject.ImageRectOffset = icon.ImageRectOffset
+    ImageObject.ImageRectSize = icon.ImageRectSize
+end
+
 local assets = {
 	interFont = "rbxassetid://12187365364",
 	userInfoBlurred = "rbxassetid://18824089198",
